@@ -1,0 +1,580 @@
+#!/usr/bin/env python
+import pygame.mixer
+from time import sleep
+import gpio as GPIO
+from sys import exit
+import os
+
+try:
+    Ausb=os.system('sudo mount /dev/sda1 /home/pi/usbdrv -o uid=pi,gid=pi')
+    if Ausb==0:
+        print("Mount success")
+except:
+    print("Mount failure")
+
+btn1=4
+btn2=17
+btn3=27
+btn4=22
+btn5=10
+btn6=9
+btn7=11
+btn8=5
+btn9=6
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(btn1, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(btn2, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(btn3, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(btn4, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(btn5, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(btn6, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(btn7, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(btn8, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(btn9, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+
+lock1=0
+lock2=0
+lock3=0
+lock4=0
+lock5=0
+lock6=0
+lock7=0
+lock8=0
+lock9=0
+
+vlm1=1
+vlm2=1
+vlm3=1
+vlm4=1
+vlm5=1
+vlm6=1
+vlm7=1
+vlm8=1
+vlm9=1
+
+loop1=0
+loop2=0
+loop3=0
+loop4=0
+loop5=0
+loop6=0
+loop7=0
+loop8=0
+loop9=0
+
+ft1=0
+ft2=0
+ft3=0
+ft4=0
+ft5=0
+ft6=0
+ft7=0
+ft8=0
+ft9=0
+
+fen1=0
+fen2=0
+fen3=0
+fen4=0
+fen5=0
+fen6=0
+fen7=0
+fen8=0
+fen9=0
+
+fcon=0
+
+if (os.path.isfile('/home/pi/usbdrv/iap_init.txt')==True):
+    print ("USB Init file")
+    fcon=2
+else:
+    if (os.path.isfile('/home/pi/iap_init.txt')==True):
+        print ("root Init file")
+        fcon=1
+    else:
+        print ("No Init file")
+
+if fcon!=0:
+    if fcon==1:
+        f=open('/home/pi/iap_init.txt','r');
+    else:
+        f=open('/home/pi/usbdrv/iap_init.txt','r')
+    fr=f.read(1)
+    while fr!='':
+        st=''
+        while fr!='$':
+            fr=f.read(1)
+        fr=f.read(1)
+        while fr!=' ':
+            st+=fr
+            fr=f.read(1)
+        fnm=int(st)
+        fr=f.read(1)
+        st=''
+        while fr!='=':
+            st+=fr
+            fr=f.read(1)
+        fcmd=st
+        st=''
+        fr=f.read(1)
+        while fr!='' and fr!='\n':    
+            st+=fr
+            fr=f.read(1)
+        try:
+            fval=int(st)
+            ffval=float(st)
+        except:
+            fval=0
+            ffval=0
+            
+        if fnm==1:
+            if fcmd=='volume':
+                vlm1=float(ffval/100)
+            if fcmd=='fadetime':
+                ft1=fval
+            if fcmd=='loop':
+                loop1=fval
+            if fcmd=='fadeout':
+                fen1=fval
+    
+        if fnm==2:
+            if fcmd=='volume':
+                vlm2=float(ffval/100)
+            if fcmd=='fadetime':
+                ft2=fval
+            if fcmd=='loop':
+                loop2=fval
+            if fcmd=='fadeout':
+                fen2=fval
+    
+        if fnm==3:
+            if fcmd=='volume':
+                vlm3=float(ffval/100)
+            if fcmd=='fadetime':
+                ft3=fval
+            if fcmd=='loop':
+                loop3=fval
+            if fcmd=='fadeout':
+                fen3=fval
+    
+        if fnm==4:
+            if fcmd=='volume':
+                vlm4=float(ffval/100)
+            if fcmd=='fadetime':
+                ft4=fval
+            if fcmd=='loop':
+                loop4=fval
+            if fcmd=='fadeout':
+                fen4=fval
+    
+        if fnm==5:
+            if fcmd=='volume':
+                vlm5=float(ffval/100)
+            if fcmd=='fadetime':
+                ft5=fval
+            if fcmd=='loop':
+                loop5=fval
+            if fcmd=='fadeout':
+                fen5=fval
+    
+        if fnm==6:
+            if fcmd=='volume':
+                vlm6=float(ffval/100)
+            if fcmd=='fadetime':
+                ft6=fval
+            if fcmd=='loop':
+                loop6=fval
+            if fcmd=='fadeout':
+                fen6=fval
+    
+        if fnm==7:
+            if fcmd=='volume':
+                vlm7=float(ffval/100)
+            if fcmd=='fadetime':
+                ft7=fval
+            if fcmd=='loop':
+                loop7=fval
+            if fcmd=='fadeout':
+                fen7=fval
+    
+        if fnm==8:
+            if fcmd=='volume':
+                vlm8=float(ffval/100)
+            if fcmd=='fadetime':
+                ft8=fval
+            if fcmd=='loop':
+                loop8=fval
+            if fcmd=='fadeout':
+                fen8=fval
+    
+        if fnm==9:
+            if fcmd=='volume':
+                vlm9=float(ffval/100)
+            if fcmd=='fadetime':
+                ft9=fval
+            if fcmd=='loop':
+                loop9=fval
+            if fcmd=='fadeout':
+                fen9=fval
+
+        fr=f.read(1)
+    f.close()
+
+
+def set_init():
+    pygame.mixer.init(48000, -16, 2, 1024)
+    pygame.mixer.set_num_channels(16)
+
+set_init()
+
+if (os.path.isfile('/home/pi/usbdrv/Sfx01.wav')==True):
+    sndA = pygame.mixer.Sound("/home/pi/usbdrv/Sfx01.wav")
+    print ("USB A file")
+else:
+    sndA = pygame.mixer.Sound("/home/pi/Sfx01.wav")
+    print ("root A file")
+
+if (os.path.isfile('/home/pi/usbdrv/Sfx02.wav')==True):
+    sndB = pygame.mixer.Sound("/home/pi/usbdrv/Sfx02.wav")
+    print ("USB B file")
+else:
+    sndB = pygame.mixer.Sound("/home/pi/Sfx02.wav")
+    print ("root B file")
+
+if (os.path.isfile('/home/pi/usbdrv/Sfx03.wav')==True):
+    sndC = pygame.mixer.Sound("/home/pi/usbdrv/Sfx03.wav")
+    print ("USB C file")
+
+if (os.path.isfile('/home/pi/usbdrv/Sfx04.wav')==True):
+    sndD = pygame.mixer.Sound("/home/pi/usbdrv/Sfx04.wav")
+    print ("USB D file")
+else:
+    sndD = pygame.mixer.Sound("/home/pi/Sfx04.wav")
+    print ("root D file")
+
+if (os.path.isfile('/home/pi/usbdrv/Sfx05.wav')==True):
+    sndE = pygame.mixer.Sound("/home/pi/usbdrv/Sfx05.wav")
+    print ("USB E file")
+else:
+    sndE = pygame.mixer.Sound("/home/pi/Sfx05.wav")
+    print ("root E file")
+
+if (os.path.isfile('/home/pi/usbdrv/Sfx06.wav')==True):
+    sndF = pygame.mixer.Sound("/home/pi/usbdrv/Sfx06.wav")
+    print ("USB F file")
+else:
+    sndF = pygame.mixer.Sound("/home/pi/Sfx06.wav")
+    print ("root F file")
+
+if (os.path.isfile('/home/pi/usbdrv/Sfx07.wav')==True):
+    sndG = pygame.mixer.Sound("/home/pi/usbdrv/Sfx07.wav")
+    print ("USB G file")
+else:
+    sndG = pygame.mixer.Sound("/home/pi/Sfx07.wav")
+    print ("root G file")
+
+if (os.path.isfile('/home/pi/usbdrv/Sfx08.wav')==True):
+    sndH = pygame.mixer.Sound("/home/pi/usbdrv/Sfx08.wav")
+    print ("USB H file")
+else:
+    sndH = pygame.mixer.Sound("/home/pi/Sfx08.wav")
+    print ("root H file")
+
+if (os.path.isfile('/home/pi/usbdrv/Sfx09.wav')==True):
+    sndI = pygame.mixer.Sound("/home/pi/usbdrv/Sfx09.wav")
+    print ("USB I file")
+else:
+    sndI = pygame.mixer.Sound("/home/pi/Sfx09.wav")
+    print ("root I file")
+
+
+soundChannelA = pygame.mixer.Channel(0)
+soundChannelB = pygame.mixer.Channel(1)
+soundChannelC = pygame.mixer.Channel(2)
+soundChannelD = pygame.mixer.Channel(3)
+soundChannelE = pygame.mixer.Channel(4)
+soundChannelF = pygame.mixer.Channel(5)
+soundChannelG = pygame.mixer.Channel(6)
+soundChannelH = pygame.mixer.Channel(7)
+soundChannelI = pygame.mixer.Channel(8)
+soundChannelJ = pygame.mixer.Channel(9)
+
+
+print ("Soundboard Ready.")
+
+soundChannelA.play(sndA)
+sleep(2)
+soundChannelA.fadeout(ft1)
+sleep(.5)
+soundChannelB.play(sndB)
+sleep(2)
+soundChannelB.fadeout(ft2)
+sleep(.5)
+soundChannelC.play(sndC)
+sleep(2)
+soundChannelC.fadeout(ft3)
+sleep(.5)
+
+while True:
+    try:
+        if (GPIO.input(btn1) == False and lock1==0):
+            if (pygame.mixer.get_busy()==False):
+                set_init()
+            soundChannelA.play(sndA)
+            soundChannelA.set_volume(vlm1)
+            print("A")
+          
+        if (GPIO.input(btn2) == False and lock2==0):
+            if (pygame.mixer.get_busy()==False):
+                set_init()
+            soundChannelB.play(sndB)
+            soundChannelB.set_volume(vlm2)
+            print("B")
+
+        if (GPIO.input(btn3) == False and lock3==0):
+            if (pygame.mixer.get_busy()==False):
+                set_init()
+            soundChannelC.play(sndC)
+            soundChannelC.set_volume(vlm3)
+            print("C")
+          
+        if (GPIO.input(btn4) == False and lock4==0):
+            if (pygame.mixer.get_busy()==False):
+                set_init()
+            soundChannelD.play(sndD)
+            soundChannelD.set_volume(vlm4)
+            print("D")
+          
+        if (GPIO.input(btn5) == False and lock5==0):
+            if (pygame.mixer.get_busy()==False):
+                set_init()
+            soundChannelE.play(sndE)
+            soundChannelE.set_volume(vlm5)
+            print("E")
+          
+        if (GPIO.input(btn6) == False and lock6==0):
+            if (pygame.mixer.get_busy()==False):
+                set_init()
+            soundChannelF.play(sndF)
+            soundChannelF.set_volume(vlm6)
+            print("F")
+          
+        if (GPIO.input(btn7) == False and lock7==0):
+            if (pygame.mixer.get_busy()==False):
+                set_init()
+            soundChannelG.play(sndG)
+            soundChannelG.set_volume(vlm7)
+            print("G")
+                     
+        if (GPIO.input(btn8) == False and lock8==0):
+            if (pygame.mixer.get_busy()==False):
+                set_init()
+            soundChannelH.play(sndH)
+            soundChannelH.set_volume(vlm8)
+            print("H")
+            
+        if (GPIO.input(btn9) == False and lock9==0):
+            if (pygame.mixer.get_busy()==False):
+                set_init()
+            soundChannelI.play(sndI)
+            soundChannelI.set_volume(vlm9)
+            print("I")
+            
+           
+#--------------- lock set  
+
+        if (GPIO.input(btn1) == True and lock1>0):
+            
+            lock1-=1
+            if (pygame.mixer.get_busy()>0):
+                if (lock1==2 and soundChannelA.get_busy()==1 and fen1==1):
+                    soundChannelA.fadeout(ft1)
+        if (GPIO.input(btn1)== False):
+            lock1=10
+
+        if (GPIO.input(btn2) == True and lock2>0):
+            
+            lock2-=1
+            if (pygame.mixer.get_busy()>0):
+                if (lock2==2 and soundChannelB.get_busy()==1 and fen2==1):
+                    soundChannelB.fadeout(ft2)
+        if (GPIO.input(btn2)== False):
+            lock2=10
+
+        if (GPIO.input(btn3) == True and lock3>0):
+            
+            lock3-=1
+            if (pygame.mixer.get_busy()>0):
+                if (lock3==2 and soundChannelC.get_busy()==1 and fen3==1):
+                    soundChannelC.fadeout(ft3)
+        if (GPIO.input(btn3)== False):
+            lock3=10
+
+        if (GPIO.input(btn4) == True and lock4>0):
+            
+            lock4-=1
+            if (pygame.mixer.get_busy()>0):
+                if (lock4==2 and soundChannelD.get_busy()==1 and fen4==1):
+                    soundChannelD.fadeout(ft4)
+        if (GPIO.input(btn4)== False):
+            lock4=10
+
+        if (GPIO.input(btn5) == True and lock5>0):
+            
+            lock5-=1
+            if (pygame.mixer.get_busy()>0):
+                if (lock5==2 and soundChannelE.get_busy()==1 and fen5==1):
+                    soundChannelE.fadeout(ft5)
+        if (GPIO.input(btn5)== False):
+            lock5=10
+
+        if (GPIO.input(btn6) == True and lock6>0):
+#            GPIO.output(5,False)
+            lock6-=1
+            if (pygame.mixer.get_busy()>0):
+                if (lock6==2 and soundChannelF.get_busy()==1 and fen6==1):
+                    soundChannelF.fadeout(ft6)
+        if (GPIO.input(btn6)== False):
+            lock6=10
+
+        if (GPIO.input(btn7) == True and lock7>0):
+#            GPIO.output(5,False)
+            lock7-=1
+            if (pygame.mixer.get_busy()>0):
+                if (lock7==2 and soundChannelG.get_busy()==1 and fen7==1):
+                    soundChannelG.fadeout(ft7)
+        if (GPIO.input(btn7)== False):
+            lock7=10
+
+        if (GPIO.input(btn8) == True and lock8>0):
+#            GPIO.output(5,False)
+            lock8-=1
+            if (pygame.mixer.get_busy()>0):
+                if (lock8==2 and soundChannelH.get_busy()==1 and fen8==1):
+                    soundChannelH.fadeout(ft8)
+        if (GPIO.input(btn8)== False):
+            lock8=10
+
+        if (GPIO.input(btn9) == True and lock9>0):
+#            GPIO.output(5,False)
+            lock9-=1
+            if (pygame.mixer.get_busy()>0):
+                if (lock9==2 and soundChannelI.get_busy()==1 and fen9==1):
+                    soundChannelI.fadeout(ft9)
+        if (GPIO.input(btn9)== False):
+            lock9=10
+
+#--------------- check for busy and repeat
+
+        if (GPIO.input(btn1) == False and lock1>0 and loop1==1):
+            if (pygame.mixer.get_busy()==0):
+                set_init()
+                soundChannelA.play(sndA)
+                soundChannelA.set_volume(vlm1)
+            else:
+                if (soundChannelA.get_busy()==0):
+                    soundChannelA.play(sndA)
+                    soundChannelA.set_volume(vlm1)
+                
+        if (GPIO.input(btn2) == False and lock2>0 and loop2==1):
+            if (pygame.mixer.get_busy()==0):
+                set_init()
+                soundChannelB.play(sndB)
+                soundChannelB.set_volume(vlm2)
+            else:
+                if (soundChannelB.get_busy()==0):
+                    soundChannelB.play(sndB)
+                    soundChannelB.set_volume(vlm2)
+
+        if (GPIO.input(btn3) == False and lock3>0 and loop3==1):
+            if (pygame.mixer.get_busy()==0):
+                set_init()
+                soundChannelC.play(sndC)
+                soundChannelC.set_volume(vlm3)
+            else:
+                if (soundChannelC.get_busy()==0):
+                    soundChannelC.play(sndC)
+                    soundChannelC.set_volume(vlm3)
+            
+        if (GPIO.input(btn4) == False and lock4>0 and loop4==1):
+            if (pygame.mixer.get_busy()==0):
+                set_init()
+                soundChannelD.play(sndD)
+                soundChannelD.set_volume(vlm4)
+            else:
+                if (soundChannelD.get_busy()==0):
+                    soundChannelD.play(sndD)
+                    soundChannelD.set_volume(vlm4)
+
+        if (GPIO.input(btn5) == False and lock5>0 and loop5==1):
+            if (pygame.mixer.get_busy()==0):
+                set_init()
+                soundChannelE.play(sndE)
+                soundChannelE.set_volume(vlm5)
+            else:
+                if (soundChannelE.get_busy()==0):
+                    soundChannelE.play(sndE)
+                    soundChannelE.set_volume(vlm5)
+        
+        if (GPIO.input(btn6) == False and lock6>0 and loop6==1):
+            if (pygame.mixer.get_busy()==0):
+                set_init()
+                soundChannelF.play(sndF)
+                soundChannelF.set_volume(vlm6)
+            else:
+                if (soundChannelF.get_busy()==0):
+                    soundChannelF.play(sndF)
+                    soundChannelF.set_volume(vlm6)
+
+        if (GPIO.input(btn7) == False and lock7>0 and loop7==1):
+            if (pygame.mixer.get_busy()==0):
+                set_init()
+                soundChannelG.play(sndG)
+                soundChannelG.set_volume(vlm7)
+            else:
+                if (soundChannelG.get_busy()==0):
+                    soundChannelG.play(sndG)
+                    soundChannelG.set_volume(vlm7)
+            
+        if (GPIO.input(btn8) == False and lock8>0 and loop8==1):
+            if (pygame.mixer.get_busy()==0):
+                set_init()
+                soundChannelH.play(sndH)
+                soundChannelH.set_volume(vlm8)
+            else:
+                if (soundChannelH.get_busy()==0):
+                    soundChannelH.play(sndH)
+                    soundChannelH.set_volume(vlm8)
+                    
+        if (GPIO.input(btn9) == False and lock9>0 and loop9==1):
+            if (pygame.mixer.get_busy()==0):
+                set_init()
+                soundChannelI.play(sndI)
+                soundChannelI.set_volume(vlm9)
+            else:
+                if (soundChannelI.get_busy()==0):
+                    soundChannelI.play(sndI)
+                    soundChannelI.set_volume(vlm9)
+
+
+        if (pygame.mixer.get_busy()==False):
+            pygame.mixer.quit()
+
+
+           
+        sleep(.001)
+    except KeyboardInterrupt:
+        exit()
+
+
+
+
+
+
+
+
+
+
+
